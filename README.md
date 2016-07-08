@@ -1,7 +1,7 @@
 sshplus
 ======
 
-GTK+3/Python3 fork of sshplus based on the original sshplus from Anil Gulecha.
+GTK3/Python3 fork of sshplus based on the original sshplus from Anil Gulecha.
 
 Changes :
 
