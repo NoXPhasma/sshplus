@@ -5,7 +5,7 @@ GTK+3/Python3 fork of sshplus based on the original sshplus from Anil Gulecha.
 
 Changes :
 
-- Updated to Gtk+3 and Python3
+- Updated to Gtk3 and Python3
 - Removed sshmenu support
 - Added option menu
 
