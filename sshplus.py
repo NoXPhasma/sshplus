@@ -189,12 +189,12 @@ def build_menu():
 
     # Add SSHplus options folder to the end of the Menu
     add_separator(menu)
-    menu_item = add_menu_item(menus[-1], 'SSHplus Optionen', 'folder')
+    menu_item = add_menu_item(menus[-1], 'SSHplus Options', 'folder')
     menus.append(Gtk.Menu())
     menu_item.set_submenu(menus[-1])
-    add_menu_item(menus[-1], "Optionen", None)
-    add_menu_item(menus[-1], 'Konfigurieren', {'cmd': 'xdg-open', 'args': [os.getenv("HOME") + "/.sshplus"], 'name': 'Konfigurieren'})
-    add_menu_item(menus[-1], 'Aktualisieren', '_refresh')
+    add_menu_item(menus[-1], "Options", None)
+    add_menu_item(menus[-1], 'Edit config', {'cmd': 'xdg-open', 'args': [os.getenv("HOME") + "/.sshplus"], 'name': 'Edit config'})
+    add_menu_item(menus[-1], 'Refresh config', '_refresh')
     add_menu_item(menus[-1], 'About', '_about')
     add_separator(menus[-1])
     add_menu_item(menus[-1], 'Quit', '_quit')
