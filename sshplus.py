@@ -112,7 +112,7 @@ def menuitem_response(w, item):
         newmenu = build_menu()
         ind.set_menu(newmenu)
         notify2.init("sshplus")
-        notify2.Notification("SSHplus aktualisiert", "\"%s\" wurde eingelesen! Menüliste wurde aktualisiert!" % _SETTINGS_FILE).show()
+        notify2.Notification("SSHplus refreshed", "\"%s\" has been read! Menu list was refreshed!" % _SETTINGS_FILE).show()
     elif item == '_quit': 
         sys.exit(0)
     elif item == 'folder':
