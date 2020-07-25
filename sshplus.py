@@ -28,16 +28,17 @@
 # 3. Launch sshplus.py
 # 4. Or better yet, add it to gnome startup programs list so it's run on login.
 
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-gi.require_version('AppIndicator3', '0.1')
-from gi.repository import AppIndicator3
-import os
-import notify2
-import sys
 import shlex
-import re
+import sys
+import notify2
+import os
+import gi
+
+gi.require_version("AppIndicator3", "0.1")
+from gi.repository import AppIndicator3
+
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
 
 _VERSION = "1.0"
@@ -104,32 +105,39 @@ RDP Ex|rdesktop|-T "RDP-Server" -r sound:local 1.2.3.4
 
 
 def menuitem_response(w, item):
-    if item == '_about':
+    if item == "_about":
         show_help_dlg(_ABOUT_TXT)
-    elif item == '_edit':
+    elif item == "_edit":
         edit_config_file()
-    elif item == '_refresh':
+    elif item == "_refresh":
         newmenu = build_menu()
         ind.set_menu(newmenu)
         notify2.init("sshplus")
-        notify2.Notification("SSHplus refreshed", "\"%s\" has been read! Menu list was refreshed!" % _SETTINGS_FILE).show()
-    elif item == '_quit': 
+        notify2.Notification(
+            "SSHplus refreshed", '"%s" has been read! Menu list was refreshed!' % _SETTINGS_FILE
+        ).show()
+    elif item == "_quit":
         sys.exit(0)
-    elif item == 'folder':
+    elif item == "folder":
         pass
     else:
-        print (item)
-        os.spawnvp(os.P_NOWAIT, item['cmd'], [item['cmd']] + item['args'])
+        print(item)
+        os.spawnvp(os.P_NOWAIT, item["cmd"], [item["cmd"]] + item["args"])
         os.wait3(os.WNOHANG)
+
 
 def show_help_dlg(msg, error=False):
     if error:
         dlg_icon = Gtk.MessageType.ERROR
-        md = Gtk.MessageDialog(None, 0, dlg_icon, Gtk.ButtonsType.OK, "This is an INFO MessageDialog")
+        md = Gtk.MessageDialog(
+            None, 0, dlg_icon, Gtk.ButtonsType.OK, "This is an INFO MessageDialog"
+        )
         edit_config_file()
     else:
         dlg_icon = Gtk.MessageType.INFO
-        md = Gtk.MessageDialog(None, 0, dlg_icon, Gtk.ButtonsType.OK, "This is an INFO MessageDialog")
+        md = Gtk.MessageDialog(
+            None, 0, dlg_icon, Gtk.ButtonsType.OK, "This is an INFO MessageDialog"
+        )
     try:
         md.set_markup("<b>SSHplus %s</b>" % _VERSION)
         md.format_secondary_markup(msg)
@@ -137,21 +145,28 @@ def show_help_dlg(msg, error=False):
     finally:
         md.destroy()
 
+
 def edit_config_file():
-    if os.path.isfile(_SETTINGS_FILE) != True:
+    if os.path.isfile(_SETTINGS_FILE) is not True:
         os.mknod(_SETTINGS_FILE)
-        show_help_dlg("<b>No <i>.sshplus</i> config file found, we created one for you!\n\nPlease edit the file and reload the config.</b>\n\n%s" % \
-             _EDIT_CONFIG, error=True)
-    os.spawnvp(os.P_NOWAIT, 'xdg-open', ['xdg-open', _SETTINGS_FILE])
+        show_help_dlg(
+            "<b>No <i>.sshplus</i> config file found, we created one for you!\n\nPlease edit the"
+            " file and reload the config.</b>\n\n%s"
+            % _EDIT_CONFIG,
+            error=True,
+        )
+    os.spawnvp(os.P_NOWAIT, "xdg-open", ["xdg-open", _SETTINGS_FILE])
     os.wait3(os.WNOHANG)
+
 
 def add_separator(menu):
     separator = Gtk.SeparatorMenuItem()
     separator.show()
     menu.append(separator)
 
+
 def add_menu_item(menu, caption, item=None):
-    menu_item = Gtk.MenuItem(caption)
+    menu_item = Gtk.MenuItem.new_with_label(caption)
     if item:
         menu_item.connect("activate", menuitem_response, item)
     else:
@@ -159,6 +174,7 @@ def add_menu_item(menu, caption, item=None):
     menu_item.show()
     menu.append(menu_item)
     return menu_item
+
 
 def get_sshplusconfig():
     if not os.path.exists(_SETTINGS_FILE):
@@ -169,40 +185,36 @@ def get_sshplusconfig():
     try:
         for line in f.readlines():
             line = line.rstrip()
-            if not line or line.startswith('#'):
+            if not line or line.startswith("#"):
                 continue
             elif line == "sep":
-                app_list.append('sep')
-            elif line.startswith('label:'):
-                app_list.append({
-                    'name': 'LABEL',
-                    'cmd': line[6:], 
-                    'args': ''
-                })
-            elif line.startswith('folder:'):
-                app_list.append({
-                    'name': 'FOLDER',
-                    'cmd': line[7:], 
-                    'args': ''
-                })
+                app_list.append("sep")
+            elif line.startswith("label:"):
+                app_list.append({"name": "LABEL", "cmd": line[6:], "args": ""})
+            elif line.startswith("folder:"):
+                app_list.append({"name": "FOLDER", "cmd": line[7:], "args": ""})
             else:
                 try:
-                    name, cmd, args = line.split('|', 2)
-                    app_list.append({
-                        'name': name,
-                        'cmd': cmd,
-                        'args': [n.replace("\n", "") for n in shlex.split(args)],
-                    })
+                    name, cmd, args = line.split("|", 2)
+                    app_list.append(
+                        {
+                            "name": name,
+                            "cmd": cmd,
+                            "args": [n.replace("\n", "") for n in shlex.split(args)],
+                        }
+                    )
                 except ValueError:
-                    print ("The following line has errors and will be ignored:\n%s" % line)
+                    print("The following line has errors and will be ignored:\n%s" % line)
     finally:
         f.close()
     return app_list
 
+
 def build_menu():
-    if not os.path.exists(_SETTINGS_FILE) :
-        show_help_dlg("<b>ERROR: No .sshmenu file found in home directory</b>\n\n%s" % \
-             _ABOUT_TXT, error=True)
+    if not os.path.exists(_SETTINGS_FILE):
+        show_help_dlg(
+            "<b>ERROR: No .sshmenu file found in home directory</b>\n\n%s" % _ABOUT_TXT, error=True
+        )
         sys.exit(1)
 
     app_list = get_sshplusconfig()
@@ -213,40 +225,42 @@ def build_menu():
     for app in app_list:
         if app == "sep":
             add_separator(menus[-1])
-        elif app['name'] == "FOLDER" and not app['cmd']:
+        elif app["name"] == "FOLDER" and not app["cmd"]:
             if len(menus) > 1:
                 menus.pop()
-        elif app['name'] == "FOLDER":
-            menu_item = add_menu_item(menus[-1], app['cmd'], 'folder')
+        elif app["name"] == "FOLDER":
+            menu_item = add_menu_item(menus[-1], app["cmd"], "folder")
             menus.append(Gtk.Menu())
             menu_item.set_submenu(menus[-1])
-        elif app['name'] == "LABEL":
-            add_menu_item(menus[-1], app['cmd'], None)
+        elif app["name"] == "LABEL":
+            add_menu_item(menus[-1], app["cmd"], None)
         else:
-            add_menu_item(menus[-1], app['name'], app)
+            add_menu_item(menus[-1], app["name"], app)
 
     # Add SSHplus options folder to the end of the Menu
     add_separator(menu)
-    menu_item = add_menu_item(menus[-1], 'SSHplus Options', 'folder')
+    menu_item = add_menu_item(menus[-1], "SSHplus Options", "folder")
     menus.append(Gtk.Menu())
     menu_item.set_submenu(menus[-1])
     add_menu_item(menus[-1], "Options", None)
-    add_menu_item(menus[-1], 'Edit', '_edit')
-    add_menu_item(menus[-1], 'Refresh', '_refresh')
-    add_menu_item(menus[-1], 'About', '_about')
+    add_menu_item(menus[-1], "Edit", "_edit")
+    add_menu_item(menus[-1], "Refresh", "_refresh")
+    add_menu_item(menus[-1], "About", "_about")
     add_separator(menus[-1])
-    add_menu_item(menus[-1], 'Quit', '_quit')
+    add_menu_item(menus[-1], "Quit", "_quit")
     menus.pop()
     return menu
 
+
 if __name__ == "__main__":
-    ind = AppIndicator3.Indicator.new("sshplu", "utilities-terminal",
-                                                AppIndicator3.IndicatorCategory.APPLICATION_STATUS)
+    ind = AppIndicator3.Indicator.new(
+        "SSHplus", "utilities-terminal", AppIndicator3.IndicatorCategory.APPLICATION_STATUS
+    )
 
     ind.set_label("Launch", "none")
     ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-    
-    if not os.path.exists(_SETTINGS_FILE) :
+
+    if not os.path.exists(_SETTINGS_FILE):
         edit_config_file()
 
     appmenu = build_menu()
